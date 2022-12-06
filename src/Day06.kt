@@ -24,7 +24,6 @@ fun main() {
         for (dataStream in input) {
             firstMarkers.add(findUniqueWindow(dataStream, 4))
         }
-        println(firstMarkers)
         return firstMarkers
     }
 
@@ -33,7 +32,6 @@ fun main() {
         for (dataStream in input) {
             firstMarkers.add(findUniqueWindow(dataStream, 14))
         }
-        println(firstMarkers)
         return firstMarkers
     }
 
