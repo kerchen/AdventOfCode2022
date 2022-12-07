@@ -50,6 +50,7 @@ class FileSystem(layout: List<String>) {
             }
             parseCommand(command, commandOutput)
         }
+        root.computeSize()
     }
 
 
@@ -109,23 +110,42 @@ fun sumDirectorySizes(root: FileSystemNode, maxSize: Int): Int {
     return sum
 }
 
+fun findDirectorySizeNearestSize(root: FileSystemNode, desiredSize: Int, bestSize: Int): Int {
+    var betterSize = bestSize
+
+    for (child in root) {
+        if (child.hasChildren()) {
+            if (child.size >= desiredSize && child.size < betterSize) {
+                betterSize = child.size
+            }
+            val bestChildSize = findDirectorySizeNearestSize(child, desiredSize, betterSize)
+            if (bestChildSize < betterSize)
+                betterSize = bestChildSize
+        }
+    }
+
+    return betterSize
+}
+
 fun main() {
     fun part1(input: List<String>): Int {
         val fileSystem = FileSystem(input)
-        fileSystem.root.computeSize()
         val sum = sumDirectorySizes(fileSystem.root, 100000)
 
         return sum
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        val fileSystem = FileSystem(input)
+        val needed = 30000000 - (70000000 - fileSystem.root.size)
+        val bestSize = findDirectorySizeNearestSize(fileSystem.root, needed, fileSystem.root.size)
+        return bestSize
     }
 
     val testInput = readInput("Day07_test")
-    check(FileSystem(testInput).root.computeSize() == 48381165)
+    check(FileSystem(testInput).root.size == 48381165)
     check(part1(testInput) == 95437)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 24933642)
 
     val input = readInput("Day07")
     println(part1(input))
