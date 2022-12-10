@@ -53,7 +53,7 @@ fun main() {
     fun part1(input: List<String>): Int {
         var headPosition = Position(0, 0)
         var tailPosition = Position(0, 0)
-        var tailVisits = mutableSetOf<Position>(tailPosition.copy())
+        var tailVisits = mutableSetOf(tailPosition.copy())
 
         for (moveString in input) {
             val move = Move(moveString)
@@ -64,9 +64,9 @@ fun main() {
                 //println("Head moved to ${headPosition.x}, ${headPosition.y}")
                 if (tailPosition.follow(headPosition)) {
                     //println("Tail moved to ${tailPosition.x}, ${tailPosition.y}")
+                    tailVisits.add(tailPosition.copy())
                 }
 
-                tailVisits.add(tailPosition.copy())
                 stepsRemaining -= 1
             }
         }
@@ -74,15 +74,35 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        val knotCount = 10
+        var knotPositions = MutableList(knotCount) {Position(0, 0)}
+        var tailVisits = mutableSetOf(knotPositions[knotCount-1].copy())
+
+        for (moveString in input) {
+            val move = Move(moveString)
+            //println("Move: ${moveString}")
+            var stepsRemaining = move.steps
+            while(stepsRemaining > 0) {
+                knotPositions[0].move(move.deltaX, move.deltaY)
+                //println("Head moved to ${knotPositions[0].x}, ${knotPositions[0].y}")
+                for (i in IntRange(1, knotCount-1)) {
+                    knotPositions[i].follow(knotPositions[i - 1])
+                }
+                tailVisits.add(knotPositions[knotCount-1].copy())
+                stepsRemaining -= 1
+            }
+        }
+        return tailVisits.size
     }
 
     val testInput = readInput("Day09_test")
     check(part1(testInput) == 13)
-    check(part2(testInput) == 0)
 
     val test2Input = readInput("Day09_test2")
     check(part1(test2Input) == 8)
+
+    val testPart2Input = readInput("Day09_part2_test")
+    check(part2(testPart2Input) == 36)
 
     val input = readInput("Day09")
     println(part1(input))
