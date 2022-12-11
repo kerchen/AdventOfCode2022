@@ -1,12 +1,13 @@
+import java.math.BigInteger
 import java.util.regex.Pattern
 
-data class Item(var worryLevel: Int)
+data class Item(var worryLevel: BigInteger)
 
 class Monkey(startingItems: List<Item>,
-             val inspectEffectOperation: (Int) -> Int,
-             val testFunction: (Int) -> Boolean,
-             val testSuccessRecipient: Int,
-             val testFailureRecipient: Int) {
+             val inspectEffectOperation: (BigInteger) -> BigInteger,
+             val testFunction: (BigInteger) -> Boolean,
+             private val testSuccessRecipient: Int,
+             private val testFailureRecipient: Int) {
 
     var items = mutableListOf<Item>()
 
@@ -16,11 +17,13 @@ class Monkey(startingItems: List<Item>,
         }
     }
 
-    fun inspectItem(item: Item): Int {
+    fun inspectItem(item: Item, worryReduction: Boolean): Int {
         // Apply inspection operation
         item.worryLevel = inspectEffectOperation(item.worryLevel)
         // Apply boredom effect
-        item.worryLevel /= 3
+        if (worryReduction) {
+            item.worryLevel /= 3.toBigInteger()
+        }
         // Test worry level & throw
         if (testFunction(item.worryLevel))
             return testSuccessRecipient
@@ -29,16 +32,16 @@ class Monkey(startingItems: List<Item>,
 }
 
 fun createItems(itemsString: String): List<Item> {
-    var items = mutableListOf<Item>()
+    val items = mutableListOf<Item>()
     val worries = itemsString.split(",")
 
     for (worry in worries) {
-        items.add(Item(worry.trim().toInt()))
+        items.add(Item(worry.trim().toBigInteger()))
     }
     return items
 }
 
-fun createOperation(opString: String): (Int) -> Int {
+fun createOperation(opString: String): (BigInteger) -> BigInteger {
     val equalSplit = opString.split("=")
     val elements = equalSplit[1].trim().split(" ")
 
@@ -48,21 +51,21 @@ fun createOperation(opString: String): (Int) -> Int {
             if (elements[2].trim() == "old")
                 return { v -> v * v }
             else
-                return { v -> v * elements[2].trim().toInt() }
+                return { v -> v * elements[2].trim().toBigInteger() }
         }
         "+" -> {
-            return { v -> v + elements[2].trim().toInt() }
+            return { v -> v + elements[2].trim().toBigInteger() }
         }
         else -> throw Exception("Unexpected operator")
     }
 }
 
-fun createTest(testString: String): (Int) -> Boolean {
+fun createTest(testString: String): (BigInteger) -> Boolean {
     val pattern = Pattern.compile("""divisible by (\d+)""")
     val matcher = pattern.matcher(testString)
     matcher.find()
-    val factor = matcher.group(1).toInt()
-    return { v -> v % factor == 0 }
+    val factor = matcher.group(1).toBigInteger()
+    return { v -> (v % factor) == 0.toBigInteger() }
 }
 
 fun parseRecipient(recipientString: String): Int {
@@ -96,46 +99,52 @@ fun createMonkey(inputIt: Iterator<String>): Monkey {
     return Monkey(createItems(itemsString), createOperation(operationString), createTest(testString), parseRecipient(successString), parseRecipient(failureString) )
 }
 
-fun main() {
-    fun part1(input: List<String>): Int {
-        val inputIt = input.iterator()
-        var monkeys = mutableListOf<Monkey>()
+fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: Boolean): Long {
+    val inputIt = input.iterator()
+    val monkeys = mutableListOf<Monkey>()
 
-        while(inputIt.hasNext()) {
-            val recordLine = inputIt.next().trim()
-            if (recordLine.isEmpty()) continue
-            check(recordLine.startsWith("Monkey"))
-            monkeys.add(createMonkey(inputIt))
-        }
-        val inspectionCounts = MutableList(monkeys.size) {0}
-        for (round in IntRange(1,20)) {
-            val monkeyIterator = monkeys.listIterator()
-            while (monkeyIterator.hasNext()) {
-                val index = monkeyIterator.nextIndex()
-                var monkey = monkeyIterator.next()
-                inspectionCounts[index] += monkey.items.size
-                val itemIterator = monkey.items.iterator()
-                while(itemIterator.hasNext()){
-                    val item = itemIterator.next()
-                    itemIterator.remove()
-                    val toMonkey = monkey.inspectItem(item)
-                    monkeys[toMonkey].items.add(item)
-                }
+    while(inputIt.hasNext()) {
+        val recordLine = inputIt.next().trim()
+        if (recordLine.isEmpty()) continue
+        check(recordLine.startsWith("Monkey"))
+        monkeys.add(createMonkey(inputIt))
+    }
+    val inspectionCounts = MutableList(monkeys.size) {0}
+    for (round in IntRange(1,roundCount)) {
+        val monkeyIterator = monkeys.listIterator()
+        while (monkeyIterator.hasNext()) {
+            val index = monkeyIterator.nextIndex()
+            val monkey = monkeyIterator.next()
+            inspectionCounts[index] += monkey.items.size
+            val itemIterator = monkey.items.iterator()
+            while(itemIterator.hasNext()){
+                val item = itemIterator.next()
+                itemIterator.remove()
+                val toMonkey = monkey.inspectItem(item, worryReduction)
+                monkeys[toMonkey].items.add(item)
             }
         }
-        val sortedCounts = inspectionCounts.sortedDescending()
-        return sortedCounts[0] * sortedCounts[1]
     }
+    val sortedCounts = inspectionCounts.sortedDescending()
+    return sortedCounts[0].toLong() * sortedCounts[1].toLong()
+}
 
-    fun part2(input: List<String>): Int {
-        return 0
-    }
+fun main() {
+    fun part1(input: List<String>): Long = computeMonkeyBusiness(input, 20, true)
+
+    //fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 10000, false)
+    //fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 20, false)
+    fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 1000, false)
 
     val testInput = readInput("Day11_test")
-    check(part1(testInput) == 10605)
-    check(part2(testInput) == 0)
+    check(part1(testInput) == 10605.toLong())
+    //check(part2(testInput) == 2713310158)
+    //check(part2(testInput) == (103*99).toLong())
+    check(part2(testInput) == (5204*5192).toLong())
 
+    println("On to the real data...")
     val input = readInput("Day11")
     println(part1(input))
+    println("On to the real data, part 2...")
     println(part2(input))
 }
