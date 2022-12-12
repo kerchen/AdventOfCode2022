@@ -153,12 +153,26 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        var heightMap = Day12.HeightMap(input)
+        var bestDistance = Integer.MAX_VALUE
+        for (x in IntRange(0, heightMap.columnCount-1)) {
+            for (y in IntRange(0, heightMap.rowCount-1)) {
+                if (heightMap.rows[y][x] == 0) {
+                    var graph = Graph(heightMap)
+                    val distance = graph.findShortestPath(Day12.Position(x, y), heightMap.goalPosition)
+                    if (distance < bestDistance) {
+                        bestDistance = distance
+                    }
+                }
+            }
+        }
+        println(bestDistance)
+        return bestDistance
     }
 
     val testInput = readInput("Day12_test")
     check(part1(testInput) == 31)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 29)
 
     val input = readInput("Day12")
     println(part1(input))
