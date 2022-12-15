@@ -1,3 +1,4 @@
+import kotlin.math.floor
 
 class Day14 {
     data class Point(var x: Int, var y: Int)
@@ -43,10 +44,22 @@ class Day14 {
             RIGHT
         }
 
-        fun dropSand(dropPoint: Point): Boolean {
+        fun dropSand(dropPoint: Point, floorOffset: Int = 0): Boolean {
             var direction = DIRECTION.DOWN
             var testPoint = dropPoint.copy(y=dropPoint.y+1)
-            while(testPoint.y <= maxDepth) {
+
+            if (occupiedCells.containsKey(dropPoint)) {
+                return false
+            }
+
+            while(testPoint.y <= maxDepth + floorOffset) {
+                if (floorOffset > 0)
+                {
+                    if (testPoint.y == maxDepth + floorOffset - 1){
+                        for (x in IntRange(testPoint.x-1, testPoint.x+1))
+                            occupiedCells[Point(x, testPoint.y + 1)] = Occupier.ROCK
+                    }
+                }
                 if (occupiedCells.containsKey(testPoint)) {
                     when(direction) {
                         DIRECTION.DOWN -> {
@@ -83,12 +96,18 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        val cave = Day14.Cave(input)
+        var sandUnits = 0
+        while(cave.dropSand(Day14.Point(500, 0), 2)) {
+            sandUnits += 1
+        }
+        println(sandUnits)
+        return sandUnits
     }
 
     val testInput = readInput("Day14_test")
     check(part1(testInput) == 24)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 93)
 
     val input = readInput("Day14")
     println(part1(input))
