@@ -1,3 +1,6 @@
+package day05
+
+import readInput
 import java.util.regex.Pattern
 
 class CargoBay(arrangement: List<String>, newerCrane: Boolean = false) {

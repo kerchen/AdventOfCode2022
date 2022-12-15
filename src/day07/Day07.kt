@@ -1,4 +1,6 @@
-import java.io.File
+package day07
+
+import readInput
 import java.util.*
 
 

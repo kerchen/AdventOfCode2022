@@ -1,4 +1,6 @@
-import java.lang.Exception
+package day04
+
+import readInput
 
 class Section(sectionRange: String) {
     var startID: Int = 0

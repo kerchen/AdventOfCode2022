@@ -1,9 +1,15 @@
+package day11
+
+import readInput
 import java.math.BigInteger
 import java.util.regex.Pattern
 
-data class Item(var worryLevel: BigInteger)
+data class Item(var worryLevel: BigInteger) {
+    var ownershipHistory = mutableListOf<Int>()
+}
 
 class Monkey(startingItems: List<Item>,
+             monkeyNumber: Int,
              val inspectEffectOperation: (BigInteger) -> BigInteger,
              val testFunction: (BigInteger) -> Boolean,
              private val testSuccessRecipient: Int,
@@ -14,6 +20,7 @@ class Monkey(startingItems: List<Item>,
     init {
         for (item in startingItems) {
             items.add(item.copy())
+            items.last().ownershipHistory.add(monkeyNumber)
         }
     }
 
@@ -75,7 +82,7 @@ fun parseRecipient(recipientString: String): Int {
     return matcher.group(1).toInt()
 }
 
-fun createMonkey(inputIt: Iterator<String>): Monkey {
+fun createMonkey(inputIt: Iterator<String>, monkeyNumber: Int): Monkey {
     val itemsLine = inputIt.next().trim()
     check(itemsLine.startsWith("Starting items:"))
     val itemsString = itemsLine.split(":")[1]
@@ -96,7 +103,7 @@ fun createMonkey(inputIt: Iterator<String>): Monkey {
     check(failureLine.startsWith("If false:"))
     val failureString = failureLine.split(":")[1]
 
-    return Monkey(createItems(itemsString), createOperation(operationString), createTest(testString), parseRecipient(successString), parseRecipient(failureString) )
+    return Monkey(createItems(itemsString), monkeyNumber, createOperation(operationString), createTest(testString), parseRecipient(successString), parseRecipient(failureString) )
 }
 
 fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: Boolean): Long {
@@ -107,7 +114,7 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: 
         val recordLine = inputIt.next().trim()
         if (recordLine.isEmpty()) continue
         check(recordLine.startsWith("Monkey"))
-        monkeys.add(createMonkey(inputIt))
+        monkeys.add(createMonkey(inputIt, monkeys.size))
     }
     val inspectionCounts = MutableList(monkeys.size) {0}
     for (round in IntRange(1,roundCount)) {
@@ -122,6 +129,7 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: 
                 itemIterator.remove()
                 val toMonkey = monkey.inspectItem(item, worryReduction)
                 monkeys[toMonkey].items.add(item)
+                item.ownershipHistory.add(toMonkey)
             }
         }
     }
@@ -132,15 +140,15 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: 
 fun main() {
     fun part1(input: List<String>): Long = computeMonkeyBusiness(input, 20, true)
 
-    //fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 10000, false)
-    //fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 20, false)
-    fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 1000, false)
+    //fun part2(input: List<String>): Long = day11.computeMonkeyBusiness(input, 10000, false)
+    fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 20, false)
+    //fun part2(input: List<String>): Long = day11.computeMonkeyBusiness(input, 1000, false)
 
     val testInput = readInput("Day11_test")
     check(part1(testInput) == 10605.toLong())
     //check(part2(testInput) == 2713310158)
-    //check(part2(testInput) == (103*99).toLong())
-    check(part2(testInput) == (5204*5192).toLong())
+    check(part2(testInput) == (103*99).toLong())
+    //check(part2(testInput) == (5204*5192).toLong())
 
     println("On to the real data...")
     val input = readInput("Day11")

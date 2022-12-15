@@ -1,3 +1,6 @@
+package day09
+
+import readInput
 import java.lang.Math.abs
 
 data class Position(var x: Int, var y: Int) {
@@ -57,7 +60,7 @@ fun main() {
 
         for (moveString in input) {
             val move = Move(moveString)
-            //println("Move: ${moveString}")
+            //println("day09.Move: ${moveString}")
             var stepsRemaining = move.steps
             while(stepsRemaining > 0) {
                 headPosition.move(move.deltaX, move.deltaY)
@@ -75,12 +78,12 @@ fun main() {
 
     fun part2(input: List<String>): Int {
         val knotCount = 10
-        var knotPositions = MutableList(knotCount) {Position(0, 0)}
+        var knotPositions = MutableList(knotCount) { Position(0, 0) }
         var tailVisits = mutableSetOf(knotPositions[knotCount-1].copy())
 
         for (moveString in input) {
             val move = Move(moveString)
-            //println("Move: ${moveString}")
+            //println("day09.Move: ${moveString}")
             var stepsRemaining = move.steps
             while(stepsRemaining > 0) {
                 knotPositions[0].move(move.deltaX, move.deltaY)

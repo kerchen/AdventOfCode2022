@@ -1,3 +1,6 @@
+package day12
+
+import readInput
 
 class Node(val id: Int) {
     var shortestPath = mutableListOf<Node>()

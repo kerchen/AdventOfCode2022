@@ -1,3 +1,7 @@
+package day02
+
+import readInput
+
 enum class OpponentShape {
     ROCK(),
     PAPER(),

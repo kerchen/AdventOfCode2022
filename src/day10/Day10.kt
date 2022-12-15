@@ -1,3 +1,6 @@
+package day10
+
+import readInput
 
 data class Instruction(val duration: Int, val delta: Int)
 
@@ -21,7 +24,7 @@ fun main() {
             }
             val instructionEndCycle = cycle + instruction.duration
             if (nextSampleCycle in cycle..instructionEndCycle){
-                // Instruction will complete after the end of a sample cycle, so use
+                // day10.Instruction will complete after the end of a sample cycle, so use
                 // pre-instruction value of x for signal strength.
                 signalStrengthSum += x * nextSampleCycle
                 x += instruction.delta

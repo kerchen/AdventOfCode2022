@@ -1,3 +1,6 @@
+package day08
+
+import readInput
 
 class HeightMap(input: List<String>) {
     var rows = mutableListOf<List<Int>>()
