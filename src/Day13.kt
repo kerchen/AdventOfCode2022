@@ -67,7 +67,7 @@ class Day13 {
         }
     }
 
-    class Packet(input: String) {
+    class Packet(input: String, val isDivider: Boolean = false) {
         val sequence = SequenceList(input)
 
     }
@@ -126,6 +126,16 @@ fun isWellOrdered(leftSide: Day13.Packet, rightSide: Day13.Packet): Boolean {
     return isWellOrdered(leftSide.sequence, rightSide.sequence) == Ordered.YES
 }
 
+class PacketComparator {
+    companion object : Comparator<Day13.Packet> {
+        override fun compare(a: Day13.Packet, b: Day13.Packet): Int {
+            val lessThan = isWellOrdered(a, b)
+            if (lessThan)
+                return -1
+            return 1
+        }
+    }
+}
 fun main() {
     fun part1(input: List<String>): Int {
         val inputIterator = input.iterator()
@@ -148,17 +158,40 @@ fun main() {
                 inputIterator.next()
             }
         }
-        println(wellOrderedPackets.sum())
         return wellOrderedPackets.sum()
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        val inputIterator = input.iterator()
+        val packets = mutableListOf<Day13.Packet>()
+
+        packets.add(Day13.Packet("[2]", true))
+        packets.add(Day13.Packet("[6]", true))
+
+        while(inputIterator.hasNext()) {
+            val packetString = inputIterator.next()
+            packets.add(Day13.Packet(packetString.substring(1, packetString.length-1 )))
+            val packetString2 = inputIterator.next()
+            packets.add(Day13.Packet(packetString2.substring(1, packetString2.length-1 )))
+
+            if (inputIterator.hasNext()) {
+                inputIterator.next()
+            }
+        }
+        var decoderKey = 1
+        var index = 1
+        for (p in packets.sortedWith(PacketComparator)) {
+            if (p.isDivider) {
+                decoderKey *= index
+            }
+            index += 1
+        }
+        return decoderKey
     }
 
     val testInput = readInput("Day13_test")
     check(part1(testInput) == 13)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 140)
 
     val input = readInput("Day13")
     println(part1(input))
