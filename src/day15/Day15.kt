@@ -42,7 +42,37 @@ class SensorField(input: List<String>, focusRow: Long) {
             }
         }
     }
+}
 
+class ConstrainedSensorField(input: List<String>, focusRow: Long, limit: Long) {
+    var field = mutableMapOf<Long, FieldReading>()
+
+    init {
+        for (reading in input) {
+            var sensorLocation = Point(0, 0)
+            var beaconLocation = Point(0, 0)
+            if (parseSensorReading(reading, sensorLocation, beaconLocation)) {
+                // Assume beacons & sensors cannot be in the same location
+                if (sensorLocation.y == focusRow && sensorLocation.x in 0 .. limit)
+                    field[sensorLocation.x] = FieldReading.SENSOR
+                if (beaconLocation.y == focusRow && beaconLocation.x in 0 .. limit)
+                    field[beaconLocation.x] = FieldReading.BEACON
+                val range = sensorLocation.manhattanDistance(beaconLocation) - abs(sensorLocation.y-focusRow)
+
+                for (x in LongRange(-range, range)) {
+                    val testX = sensorLocation.x + x
+                    if (testX in 0 .. limit) {
+                        if (true) {
+                            val distance = abs(testX - sensorLocation.x)
+                            if (!field.containsKey(testX) && distance <= range) {
+                                field[testX] = FieldReading.KNOWN_EMPTY
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 fun parseSensorReading(reading: String, sensorLocation: Point, beaconLocation: Point): Boolean {
@@ -61,22 +91,40 @@ fun parseSensorReading(reading: String, sensorLocation: Point, beaconLocation: P
 fun main() {
     fun part1(input: List<String>, focusRow: Long): Int {
         var field = SensorField(input, focusRow)
-        println("Field size: ${field.field.size}")
         val count = field.field.count{ (k, v) -> k.y == focusRow && v != FieldReading.BEACON }
-        println(count)
         return count
     }
 
-    fun part2(input: List<String>): Int {
-        return 0
+    fun part2(input: List<String>, limit: Long): Long {
+        var tuningFrequency = 0.toLong()
+
+        for (focusRow in LongRange(0, limit)) {
+            var field = ConstrainedSensorField(input, focusRow, limit)
+            //println("Row ${focusRow} size = ${field.field.size}")
+            //println(field.field)
+            if (field.field.size.toLong() == limit){
+                var beaconLocation = Point(-1, focusRow)
+                for (x in LongRange(0, limit)) {
+                    if (! field.field.containsKey(x)){
+                        beaconLocation.x = x
+                        break
+                    }
+                }
+                println("Found beacon location: ${beaconLocation.x}, ${beaconLocation.y}")
+                check(beaconLocation.x >= 0)
+                tuningFrequency = beaconLocation.x * 4000000 + beaconLocation.y
+                break
+            }
+        }
+        println("Tuning frequency: $tuningFrequency")
+        return tuningFrequency
     }
 
     val testInput = readInput("Day15_test")
     check(part1(testInput, 10.toLong()) == 26)
-    check(part2(testInput) == 0)
+    check(part2(testInput, 20) == 56000011.toLong())
 
     val input = readInput("Day15")
-    // 5543957 Too high
     println(part1(input, 2000000.toLong()))
-    println(part2(input))
+    println(part2(input, 4000000.toLong()))
 }
