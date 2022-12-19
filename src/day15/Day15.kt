@@ -3,12 +3,10 @@ package day15
 
 import readInput
 import java.lang.Math.abs
-import java.util.*
 import java.util.regex.Pattern
-import javax.swing.Box
 
-data class Point(var x: Long, var y: Long) {
-    fun manhattanDistance(other: Point): Long {
+data class Point(var x: Int, var y: Int) {
+    fun manhattanDistance(other: Point): Int {
         return abs(x-other.x) + abs(y-other.y)
     }
 }
@@ -19,7 +17,7 @@ enum class FieldReading {
     KNOWN_EMPTY
 }
 
-class SensorField(input: List<String>, focusRow: Long) {
+class SensorField(input: List<String>, focusRow: Int) {
     var field = mutableMapOf<Point, FieldReading>()
 
     init {
@@ -34,7 +32,7 @@ class SensorField(input: List<String>, focusRow: Long) {
                 field[beaconLocation] = FieldReading.BEACON
                 val range = sensorLocation.manhattanDistance(beaconLocation)
 
-                for (x in LongRange(-range, range)) {
+                for (x in IntRange(-range, range)) {
                     val testPoint = Point(sensorLocation.x + x, focusRow)
                     val distance = testPoint.manhattanDistance(sensorLocation)
                     if (!field.containsKey(testPoint) && distance <= range) {
@@ -56,44 +54,6 @@ fun parseInput(input: List<String>, readings: MutableList<Pair<Point, Point>>) {
     }
 }
 
-class ConstrainedSensorField(readings: List<Pair<Point, Point>>, focusRow: Long, limit: Long) {
-    var field: BitSet = BitSet(limit.toInt()+1)
-    var setCount = 0
-
-    init {
-        for (reading in readings) {
-            val sensorLocation = reading.first
-            val beaconLocation = reading.second
-            // Assume beacons & sensors cannot be in the same location
-            if (sensorLocation.y == focusRow && sensorLocation.x in 0 .. limit) {
-                if (! field.get(sensorLocation.x.toInt())) {
-                    field.set(sensorLocation.x.toInt())
-                    setCount += 1
-                }
-            }
-            if (beaconLocation.y == focusRow && beaconLocation.x in 0 .. limit) {
-                if (! field.get(beaconLocation.x.toInt())) {
-                    field.set(beaconLocation.x.toInt())
-                    setCount += 1
-                }
-            }
-            val range = sensorLocation.manhattanDistance(beaconLocation) - abs(sensorLocation.y-focusRow)
-
-            for (x in LongRange(-range, range)) {
-                val testX = sensorLocation.x + x
-                if (testX in 0 .. limit) {
-                    val distance = abs(testX - sensorLocation.x)
-                    if (distance <= range && ! field.get(testX.toInt())) {
-                        field.set(testX.toInt())
-                        setCount += 1
-                        if (setCount > limit)
-                            break
-                    }
-                }
-            }
-        }
-    }
-}
 
 class Sensor(p: Point, d: Int) {
     val sensor = p.copy()
@@ -108,12 +68,12 @@ class BoundingSensorField(readings: List<Pair<Point, Point>>) {
             val sensor = reading.first
             val beacon = reading.second
             val distance = sensor.manhattanDistance(beacon)
-            sensorBounds.add(Sensor(sensor, distance.toInt()))
+            sensorBounds.add(Sensor(sensor, distance))
         }
     }
 
     fun findOutside(x: Int, limit: Int): Int {
-        var testPoint = Point(x.toLong(), 0)
+        var testPoint = Point(x, 0)
         var found = true
         while (testPoint.y <= limit && found) {
             found = false
@@ -125,7 +85,7 @@ class BoundingSensorField(readings: List<Pair<Point, Point>>) {
                 }
             }
         }
-        return testPoint.y.toInt()
+        return testPoint.y
     }
 }
 fun parseSensorReading(reading: String, sensorLocation: Point, beaconLocation: Point): Boolean {
@@ -133,16 +93,16 @@ fun parseSensorReading(reading: String, sensorLocation: Point, beaconLocation: P
     val matcher = pattern.matcher(reading)
     val matchFound = matcher.find()
     if (matchFound) {
-        sensorLocation.x = matcher.group(1).toLong()
-        sensorLocation.y = matcher.group(2).toLong()
-        beaconLocation.x = matcher.group(3).toLong()
-        beaconLocation.y = matcher.group(4).toLong()
+        sensorLocation.x = matcher.group(1).toInt()
+        sensorLocation.y = matcher.group(2).toInt()
+        beaconLocation.x = matcher.group(3).toInt()
+        beaconLocation.y = matcher.group(4).toInt()
     }
     return matchFound
 }
 
 fun main() {
-    fun part1(input: List<String>, focusRow: Long): Int {
+    fun part1(input: List<String>, focusRow: Int): Int {
         var field = SensorField(input, focusRow)
         val count = field.field.count{ (k, v) -> k.y == focusRow && v != FieldReading.BEACON }
         return count
@@ -156,12 +116,12 @@ fun main() {
         var field = BoundingSensorField(readings)
         var beaconLocation = Point(-1, -1)
         for (x in IntRange(0, limit)) {
-            beaconLocation.x = x.toLong()
-            beaconLocation.y = field.findOutside(x, limit).toLong()
+            beaconLocation.x = x
+            beaconLocation.y = field.findOutside(x, limit)
 
             if (beaconLocation.y <= limit) {
                 println("Found beacon location: ${beaconLocation.x}, ${beaconLocation.y}")
-                tuningFrequency = beaconLocation.x * 4000000 + beaconLocation.y
+                tuningFrequency = beaconLocation.x.toLong() * 4000000 + beaconLocation.y.toLong()
                 break
             }
         }
@@ -170,10 +130,10 @@ fun main() {
     }
 
     val testInput = readInput("Day15_test")
-    check(part1(testInput, 10.toLong()) == 26)
+    check(part1(testInput, 10) == 26)
     check(part2(testInput, 20) == 56000011.toLong())
 
     val input = readInput("Day15")
-    println(part1(input, 2000000.toLong()))
+    println(part1(input, 2000000))
     println(part2(input, 4000000))
 }
