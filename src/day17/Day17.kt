@@ -29,9 +29,9 @@ class HBar : Shape() {
 class Plus : Shape() {
     override fun getRows(): List<Array<Char>> {
         return listOf(
-            arrayOf('.', '@', '.'),
+            arrayOf(' ', '@', ' '),
             arrayOf('@', '@', '@'),
-            arrayOf('.', '@', '.')
+            arrayOf(' ', '@', ' ')
         )
     }
 }
@@ -40,8 +40,8 @@ class Hook : Shape() {
     override fun getRows(): List<Array<Char>> {
         return listOf(
             arrayOf('@', '@', '@'),
-            arrayOf('.', '.', '@'),
-            arrayOf('.', '.', '@')
+            arrayOf(' ', ' ', '@'),
+            arrayOf(' ', ' ', '@')
         )
     }
 }
@@ -74,27 +74,30 @@ fun padRow(row: Array<Char>, offset: Int, rowWidth: Int): Array<Char> {
 }
 
 
-fun isPartMoving(part: Char): Boolean = part == '.' || part == '@'
-
 class Chamber(val width: Int = 7) {
     var rows = mutableListOf<Array<Char>>()
     var topOccupiedRow = 0
+    var shapeBottomRow = 0
 
     init {
         rows.add(Array(width) {'#'})
     }
 
-    fun dropShape(shape: Shape, gas: GasSequence) {
+    fun addStartingGap() {
         while(rows.size < topOccupiedRow + 4) {
             rows.add(Array(width) {' '})
         }
-        var bottom = rows.size
+    }
+    fun addShape(shape: Shape, offset: Int) {
         val shapeRows = shape.getRows()
+        shapeBottomRow = rows.size
         for (row in shapeRows) {
-            rows.add(padRow(row, 2, width))
+            rows.add(padRow(row, offset, width))
         }
-        var maxNewTopOccupiedRow = topOccupiedRow + shapeRows.size
-        var lastTopOccupiedRow = topOccupiedRow
+    }
+    fun dropShape(shape: Shape, gas: GasSequence) {
+        addStartingGap()
+        addShape(shape, 2)
         var keepGoing = true
         while (keepGoing) {
             val lateral = gas.next()
@@ -102,46 +105,42 @@ class Chamber(val width: Int = 7) {
                 '>' -> {
                     //println(">")
                     //dump()
-                    if (canMoveRight(bottom)) {
-                        moveRight(bottom)
-                        println("moved >")
-                        dump()
-                    } else println("could not move >")
+                    if (canMoveRight(shapeBottomRow)) {
+                        moveRight(shapeBottomRow)
+                        //println("moved >")
+                        //dump()
+                    } //else println("could not move >")
                 }
                 '<' -> {
                     //println("<")
                     //dump()
-                    if (canMoveLeft(bottom)) {
-                        moveLeft(bottom)
-                        println("moved <")
-                        dump()
-                    } else println("could not move <")
+                    if (canMoveLeft(shapeBottomRow)) {
+                        moveLeft(shapeBottomRow)
+                        //println("moved <")
+                        //dump()
+                    } //else println("could not move <")
                 }
                 else -> throw Exception("Unexpected gas direction")
             }
             //println("V")
-            if (canMoveDown(bottom)) {
-                moveDown(bottom)
-                println("moved V")
-                dump()
-                bottom -= 1
+            if (canMoveDown(shapeBottomRow)) {
+                shapeBottomRow = moveDown(shapeBottomRow)
+                //println("moved V")
+                //dump()
             } else {
                 keepGoing = false
-                solidify(bottom)
-                println("solidified")
-                println("")
-                dump()
+                solidify(shapeBottomRow)
+                //println("solidified")
+                //println("")
+                //dump()
             }
         }
-        check(maxNewTopOccupiedRow >= topOccupiedRow)
-        check(lastTopOccupiedRow <= topOccupiedRow)
     }
 
     fun solidify(bottom: Int) {
         for (row in IntRange(bottom, rows.size - 1)) {
             for (col in IntRange(0, width-1)) {
                 if (rows[row][col] == '@') rows[row][col] = '#'
-                else if (rows[row][col] == '.') rows[row][col] = ' '
             }
         }
         var emptyCount = rows.last().count {it == ' '}
@@ -157,7 +156,7 @@ class Chamber(val width: Int = 7) {
             for (col in IntRange(0, width-1)) {
                 if (rows[row][col] == '@') {
                     val neighbor = rows[row-1][col]
-                    if (neighbor != ' ' && ! isPartMoving(neighbor))
+                    if (neighbor != ' ' && neighbor != '@')
                         return false
                 }
             }
@@ -168,11 +167,11 @@ class Chamber(val width: Int = 7) {
     fun canMoveRight(bottom: Int): Boolean {
         for (row in IntRange(bottom, rows.size - 1)) {
             for (col in IntRange(0, width-1)) {
-                if (isPartMoving(rows[row][col])) {
+                if (rows[row][col] == '@') {
                     if (col == width - 1)
                         return false
                     val neighbor = rows[row][col+1]
-                    if (neighbor != ' ' && ! isPartMoving(neighbor))
+                    if (neighbor != ' ' && neighbor != '@')
                         return false
                 }
             }
@@ -183,11 +182,11 @@ class Chamber(val width: Int = 7) {
     fun canMoveLeft(bottom: Int): Boolean {
         for (row in IntRange(bottom, rows.size - 1)) {
             for (col in IntRange(0, width-1)) {
-                if (isPartMoving(rows[row][col])) {
+                if (rows[row][col] == '@') {
                     if (col == 0)
                         return false
                     val neighbor = rows[row][col-1]
-                    if (neighbor != ' ' && ! isPartMoving(neighbor))
+                    if (neighbor != ' ' && neighbor != '@')
                         return false
                 }
             }
@@ -195,37 +194,27 @@ class Chamber(val width: Int = 7) {
         return true
     }
 
-    fun moveDown(bottom: Int) {
+    fun moveDown(bottom: Int): Int {
         for (row in IntRange(bottom, rows.size - 1)) {
             for (col in IntRange(0, width-1)) {
-                if (isPartMoving(rows[row][col])) {
+                if (rows[row][col] == '@') {
                     if (rows[row][col] == '@' || rows[row-1][col] == ' ') {
                         rows[row - 1][col] = rows[row][col]
                         rows[row][col] = ' '
                     }
-                    //if (row < rows.size-1) {
-                        //rows[row][col] = rows[row+1][col]
-                    //} else {
-                        //rows[row][col] = ' '
-                    //}
-                } //else {
-                   // rows[row][col] = ' '
-                //}
+                }
             }
         }
+        return bottom - 1
     }
 
     fun moveRight(bottom: Int) {
         for (row in IntRange(bottom, rows.size - 1)) {
             for (col in IntRange(0, width-1)) {
-                if (isPartMoving(rows[row][width - col - 1])) {
+                if (rows[row][width - col - 1] == '@') {
                     rows[row][width - col] = rows[row][width - col - 1]
                     if (col < width - 1) {
-                        //if (!isPartMoving(rows[row][width - col - 2]))
-                            //rows[row][width - col - 1] = ' '
                             rows[row][width - col - 1] = rows[row][width - col - 2]
-                        //else
-                            //rows[row][width - col - 1] = ' '
                     } else {
                         rows[row][width - col - 1] = ' '
                     }
@@ -237,14 +226,11 @@ class Chamber(val width: Int = 7) {
     fun moveLeft(bottom: Int) {
         for (row in IntRange(bottom, rows.size - 1)) {
             for (col in IntRange(0, width-1)) {
-                if (isPartMoving(rows[row][col])) {
+                if (rows[row][col] == '@') {
                     rows[row][col-1] = rows[row][col]
                     if (col < width - 1) {
-                        if (!isPartMoving(rows[row][col + 1]))
+                        if (rows[row][col + 1] != '@')
                             rows[row][col] = ' '
-                            //rows[row][col] = rows[row][col + 1]
-                        //else
-                            //rows[row][col] = ' '
                     } else {
                         rows[row][col] = ' '
                     }
