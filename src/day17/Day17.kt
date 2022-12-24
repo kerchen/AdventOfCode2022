@@ -8,7 +8,6 @@ class GasSequence(input: String) {
 
     fun next(): Char {
         if (!sequenceIterator.hasNext()) {
-            //println("Gas iterator wrapping around")
             sequenceIterator = sequence.iterator()
         }
         return sequenceIterator.next()
@@ -103,36 +102,22 @@ class Chamber(val width: Int = 7) {
             val lateral = gas.next()
             when (lateral) {
                 '>' -> {
-                    //println(">")
-                    //dump()
                     if (canMoveRight(shapeBottomRow)) {
                         moveRight(shapeBottomRow)
-                        //println("moved >")
-                        //dump()
-                    } //else println("could not move >")
+                    }
                 }
                 '<' -> {
-                    //println("<")
-                    //dump()
                     if (canMoveLeft(shapeBottomRow)) {
                         moveLeft(shapeBottomRow)
-                        //println("moved <")
-                        //dump()
-                    } //else println("could not move <")
+                    }
                 }
                 else -> throw Exception("Unexpected gas direction")
             }
-            //println("V")
             if (canMoveDown(shapeBottomRow)) {
                 shapeBottomRow = moveDown(shapeBottomRow)
-                //println("moved V")
-                //dump()
             } else {
                 keepGoing = false
                 solidify(shapeBottomRow)
-                //println("solidified")
-                //println("")
-                //dump()
             }
         }
     }
@@ -213,8 +198,8 @@ class Chamber(val width: Int = 7) {
             for (col in IntRange(0, width-1)) {
                 if (rows[row][width - col - 1] == '@') {
                     rows[row][width - col] = rows[row][width - col - 1]
-                    if (col < width - 1) {
-                            rows[row][width - col - 1] = rows[row][width - col - 2]
+                    if (col < width - 1 && rows[row][width - col - 2] == '@') {
+                        rows[row][width - col - 1] = rows[row][width - col - 2]
                     } else {
                         rows[row][width - col - 1] = ' '
                     }
@@ -242,9 +227,15 @@ class Chamber(val width: Int = 7) {
     fun dump() {
         for (row in IntRange(0, rows.size - 1))
         {
-            print("%4d |".format(rows.size-row-1))
-            for (i in IntRange(0, width-1))
-                print(rows[rows.size - row - 1][i])
+            //print("%4d |".format(rows.size-row-1))
+            print("|")
+            for (i in IntRange(0, width-1)) {
+                val c = rows[rows.size - row -1][i]
+                if (c == ' ')
+                    print('.')
+                else
+                    print(c)
+            }
             println("|")
         }
         println("")
@@ -256,9 +247,7 @@ fun main() {
         val gasSequence = GasSequence(input[0])
         val chamber = Chamber()
 
-        //for (i in IntRange(0, 2021)) {
-        for (i in IntRange(0, 20)) {
-            println("Dropping shape $i:")
+        for (i in IntRange(0, 2021)) {
             when (i % 5) {
                 0 -> chamber.dropShape(HBar(), gasSequence)
                 1 -> chamber.dropShape(Plus(), gasSequence)
@@ -266,7 +255,6 @@ fun main() {
                 3 -> chamber.dropShape(VBar(), gasSequence)
                 4 -> chamber.dropShape(Nugget(), gasSequence)
             }
-            chamber.dump()
         }
         println(chamber.topOccupiedRow)
         return chamber.topOccupiedRow
