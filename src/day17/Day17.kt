@@ -105,6 +105,17 @@ fun autocorrelate(signal: List<Int>, initialOffset: Int, minSequenceLength: Int)
     return Pair(repeatStartX, matchLength)
 }
 
+fun Array<Char>.toInt(): Int {
+    var value = 0
+    for (c in this) {
+        value *= 2
+        if (c != ' ') {
+            value += 1
+        }
+    }
+    return value
+}
+
 class Chamber(val width: Int = 7) {
     var rows = mutableListOf<Array<Char>>()
     var topOccupiedRow = 0
@@ -114,6 +125,14 @@ class Chamber(val width: Int = 7) {
         rows.add(Array(width) {'#'})
     }
 
+    fun toList(): List<Int> {
+        var returnList: MutableList<Int> = MutableList(rows.size) {0}
+
+        for (row in IntRange(1, rows.size-1)) {
+            returnList[row] = rows[row].toInt()
+        }
+        return returnList
+    }
     fun addStartingGap() {
         while(rows.size < topOccupiedRow + 4) {
             rows.add(Array(width) {' '})
@@ -259,8 +278,8 @@ class Chamber(val width: Int = 7) {
     fun dump() {
         for (row in IntRange(0, rows.size - 1))
         {
-            //print("%4d |".format(rows.size-row-1))
-            print("|")
+            print("%4d |".format(rows.size-row-1))
+            //print("|")
             for (i in IntRange(0, width-1)) {
                 val c = rows[rows.size - row -1][i]
                 if (c == ' ')
@@ -268,7 +287,7 @@ class Chamber(val width: Int = 7) {
                 else
                     print(c)
             }
-            println("|")
+            println("| ${rows[rows.size - row - 1].toInt()}")
         }
         println("")
     }
@@ -288,12 +307,42 @@ fun main() {
                 4 -> chamber.dropShape(Nugget(), gasSequence)
             }
         }
-        println(chamber.topOccupiedRow)
         return chamber.topOccupiedRow
     }
 
     fun part2(input: List<String>): Long {
-        return 0
+        val gasSequence = GasSequence(input[0])
+        val chamber = Chamber()
+        var lastRow = 0
+        var deltas: MutableList<Int> = MutableList(0) {0}
+
+        // drop enough shapes to determine the repeating pattern of height changes that
+        // emerges after the initial non-repeating sequence.
+        for (i in IntRange(0, 100000-1)) {
+            when (i % 5) {
+                0 -> chamber.dropShape(HBar(), gasSequence)
+                1 -> chamber.dropShape(Plus(), gasSequence)
+                2 -> chamber.dropShape(Hook(), gasSequence)
+                3 -> chamber.dropShape(VBar(), gasSequence)
+                4 -> chamber.dropShape(Nugget(), gasSequence)
+            }
+            deltas.add(chamber.topOccupiedRow - lastRow)
+            lastRow = chamber.topOccupiedRow
+        }
+        check(deltas.size == 100000)
+        val repeatDelta = autocorrelate(deltas, 1, 10)
+        val piecesPerRepeat = repeatDelta.second
+        val initialPieces = repeatDelta.first
+        val initialHeight = deltas.slice(0..initialPieces-1).sum()
+        val repeatingHeightChange: Long = deltas.slice(initialPieces..initialPieces+piecesPerRepeat-1).sum().toLong()
+        println("Initial height: $initialHeight (made from $initialPieces pieces)")
+        println("Every $piecesPerRepeat pieces results in a height change of $repeatingHeightChange")
+        val totalPieceCount: Long = 1000000000000
+        val repeatedPieceGroups: Long = (totalPieceCount - initialPieces) / piecesPerRepeat
+        val remainingPieces: Long = totalPieceCount - initialPieces - repeatedPieceGroups * piecesPerRepeat
+        val remainingHeight = deltas.slice(initialPieces .. initialPieces + remainingPieces.toInt() - 1).sum()
+        val towerHeight: Long = initialHeight.toLong() + repeatedPieceGroups * repeatingHeightChange + remainingHeight.toLong()
+        return towerHeight
     }
 
     val testInput = readInput("Day17_test")

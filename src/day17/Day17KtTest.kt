@@ -5,6 +5,28 @@ import org.testng.annotations.Test
 class Day17KtTest {
 
     @Test
+    fun `Array of spaces converts to zero`() {
+        val array = arrayOf(' ', ' ', ' ', ' ')
+        assert(array.toInt() == 0)
+    }
+
+    @Test
+    fun `Array of 7 non-spaces converts to 127`() {
+        val array = arrayOf('#', '#', '#', '#', '#', '#', '#')
+        assert(array.toInt() == 127)
+    }
+
+    @Test
+    fun `Array of alternating non-spaces converts to 85`() {
+        val array = arrayOf('#', ' ', '#', ' ', '#', ' ', '#')
+        assert(array.toInt() == 85)
+    }
+    @Test
+    fun `Array of inverted alternating non-spaces converts to 42`() {
+        val array = arrayOf(' ', '#', ' ', '#', ' ', '#', ' ')
+        assert(array.toInt() == 42)
+    }
+    @Test
     fun `autocorrelate simple happy path`() {
         val initialNonCorrelatedSignal = listOf(2, 2, 7, 0)
         val repeatingSignal = listOf(1, 2, 3, 4)
