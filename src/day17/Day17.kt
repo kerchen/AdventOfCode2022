@@ -72,6 +72,38 @@ fun padRow(row: Array<Char>, offset: Int, rowWidth: Int): Array<Char> {
     return Array(offset) {' '} + row.copyOf() + Array(rowWidth - offset - row.size) {' '}
 }
 
+fun autocorrelate(signal: List<Int>, initialOffset: Int, minSequenceLength: Int): Pair<Int, Int> {
+    var x = initialOffset
+    var offset = 0
+    var repeatStartX = signal.size
+    var matchLength = 0
+    var repeatFound = false
+    while (! repeatFound && x < signal.size - minSequenceLength) {
+        x = initialOffset + offset
+        var testX = x + minSequenceLength
+        while (testX < signal.size) {
+            if (signal[x] == signal[testX]) {
+                repeatStartX = testX
+                matchLength = 1
+                x += 1
+                testX += 1
+                while (x < repeatStartX && testX < signal.size && signal[x] == signal[testX]) {
+                    matchLength += 1
+                    x += 1
+                    testX += 1
+                }
+                if (x == repeatStartX) {
+                    repeatFound = true
+                    break
+                }
+            } else {
+                testX += 1
+            }
+        }
+        offset += 1
+    }
+    return Pair(repeatStartX, matchLength)
+}
 
 class Chamber(val width: Int = 7) {
     var rows = mutableListOf<Array<Char>>()
@@ -260,11 +292,13 @@ fun main() {
         return chamber.topOccupiedRow
     }
 
-    fun part2(input: List<String>): Int = 0
+    fun part2(input: List<String>): Long {
+        return 0
+    }
 
     val testInput = readInput("Day17_test")
     check(part1(testInput) == 3068)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 1514285714288)
 
     val input = readInput("Day17")
     println(part1(input))
