@@ -36,11 +36,13 @@ fun areAdjacent(p1: Point, p2: Point): Boolean {
     return true
 }
 
+
 class AdjacencyMatrix(cubes: List<Point>) {
     var neighborMap: MutableMap<Point, MutableList<Point>> = mutableMapOf()
 
     init {
         for (i in IntRange(0, cubes.size - 1)) {
+
             for (j in IntRange(i+1, cubes.size - 1)) {
                 if (areAdjacent(cubes[i], cubes[j])) {
                     if (! neighborMap.containsKey(cubes[i])) {
@@ -55,6 +57,8 @@ class AdjacencyMatrix(cubes: List<Point>) {
             }
         }
     }
+
+
 }
 
 fun computeSurfaceArea(cubes: List<Point>): Int {
@@ -67,19 +71,70 @@ fun computeSurfaceArea(cubes: List<Point>): Int {
     return surfaceArea
 }
 
-fun main() {
-    fun part1(input: List<String>): Int  {
-        val cubes = parseCubes(input)
-        val surfaceArea = computeSurfaceArea(cubes)
+class Bounds(val minimum: Point, val maximum: Point) {
+    fun inBounds(pt: Point): Boolean {
+        return (pt.x in (minimum.x..maximum.x) &&
+                pt.y in (minimum.y..maximum.y) &&
+                pt.z in (minimum.z..maximum.z))
+    }
+}
 
-        return surfaceArea
+fun computeBounds(cubes: Set<Point>): Bounds {
+    var minX = Int.MAX_VALUE
+    var minY = Int.MAX_VALUE
+    var minZ = Int.MAX_VALUE
+    var maxX = Int.MIN_VALUE
+    var maxY = Int.MIN_VALUE
+    var maxZ = Int.MIN_VALUE
+
+    for (cube in cubes) {
+        minX = (cube.x - 1).coerceAtMost(minX)
+        minY = (cube.y - 1).coerceAtMost(minY)
+        minZ = (cube.z - 1).coerceAtMost(minZ)
+        maxX = (cube.x + 1).coerceAtLeast(maxX)
+        maxY = (cube.y + 1).coerceAtLeast(maxY)
+        maxZ = (cube.z + 1).coerceAtLeast(maxZ)
+    }
+    return Bounds(Point(minX, minY, minZ), Point(maxX, maxY, maxZ))
+}
+
+fun computeExteriorSurfaceArea(cubes: Set<Point>): Int {
+    var surfaceArea = 0
+    val bounds = computeBounds(cubes)
+    var cellsToVisit = mutableSetOf(bounds.minimum.copy())
+    var visitedCells = mutableSetOf<Point>()
+
+    fun visit(cell: Point, cellsToVisit: MutableSet<Point>, visitedCells: MutableSet<Point>) {
+        cellsToVisit.remove(cell)
+        visitedCells.add(cell.copy())
+
+        val adjacentPoints = listOf(cell.copy(x=cell.x+1), cell.copy(x=cell.x-1), cell.copy(y=cell.y+1), cell.copy(y=cell.y-1), cell.copy(z=cell.z+1), cell.copy(z=cell.z-1))
+        for (pt in adjacentPoints) {
+            if (bounds.inBounds(pt) && !visitedCells.contains(pt)) {
+                if (cubes.contains(pt)) {
+                    surfaceArea += 1
+                } else {
+                    cellsToVisit.add(pt.copy())
+                }
+            }
+        }
     }
 
-    fun part2(input: List<String>): Int = 0
+    while(!cellsToVisit.isEmpty()) {
+        visit(cellsToVisit.last(), cellsToVisit, visitedCells)
+    }
+
+    return surfaceArea
+}
+
+fun main() {
+    fun part1(input: List<String>): Int = computeSurfaceArea(parseCubes(input))
+
+    fun part2(input: List<String>): Int  = computeExteriorSurfaceArea(parseCubes(input).toSet())
 
     val testInput = readInput("Day18_test")
     check(part1(testInput) == 64)
-    check(part2(testInput) == 0)
+    check(part2(testInput) == 58)
 
     val input = readInput("Day18")
     println(part1(input))

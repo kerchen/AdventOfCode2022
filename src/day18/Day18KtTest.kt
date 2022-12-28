@@ -87,4 +87,58 @@ class Day18KtTest {
         val cube2 = Point(0, 1, 0)
         assertFalse(areAdjacent(cube1, cube2))
     }
+
+    @Test
+    fun `Bounding cuboid for single cube at 0, 0, 0`() {
+        val cubes = setOf(Point(0, 0, 0))
+        val bounds = computeBounds(cubes)
+
+        assert(bounds.minimum == Point(-1, -1, -1))
+        assert(bounds.maximum == Point(1, 1, 1))
+    }
+
+    @Test
+    fun `Bounding cuboid for star centered on 0, 0, 0`() {
+        val cubes = setOf(
+            Point(0, 0, 1),
+            Point(0, -1, 0),
+            Point(0, 1, 0 ),
+            Point(1, 0, 0),
+            Point(-1, 0, 0),
+            Point(0, 0, -1)
+            )
+        val bounds = computeBounds(cubes)
+
+        assert(bounds.minimum == Point(-2, -2, -2))
+        assert(bounds.maximum == Point(2, 2, 2))
+    }
+    @Test
+    fun `Two adjacent cubes have exterior surface area = 10`() {
+        val cubes = setOf(Point(0, 0, 0), Point(1, 0, 0))
+        assert(computeExteriorSurfaceArea(cubes) == 10)
+    }
+
+    @Test
+    fun `Star with empty center has exterior surface area = 30`() {
+        val cubes = setOf(
+            Point(0, 0, 1),
+            Point(0, -1, 0),
+            Point(0, 1, 0),
+            Point(1, 0, 0),
+            Point(-1, 0, 0),
+            Point(0, 0, -1)
+        )
+        assert(computeExteriorSurfaceArea(cubes) == 30)
+    }
+    @Test
+    fun `Concave shape has exterior surface area = 30`() {
+        val cubes = setOf(
+            Point(0, 0, 1),
+            Point(0, -1, 0),
+            Point(0, 1, 0),
+            Point(1, 0, 0),
+            Point(-1, 0, 0)
+        )
+        assert(computeExteriorSurfaceArea(cubes) == 30)
+    }
 }
