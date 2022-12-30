@@ -36,33 +36,4 @@ class Day19KtTest {
 
         assert(blueprints.size == 4)
     }
-
-    @Test
-    fun `Correct amount of ore produced after first minute`() {
-        val blueprint = Blueprint( "Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 6 clay. Each geode robot costs 9 ore and 8 obsidian.")
-        val states = permuteProductionStates(blueprint, 1)
-
-        assert(states.size == 1)
-        assert(states[0].materials[Material.ORE] == 1)
-    }
-
-    @Test
-    fun `Correct amount of ore produced after second minute`() {
-        val blueprint = Blueprint( "Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 6 clay. Each geode robot costs 9 ore and 8 obsidian.")
-        val states = permuteProductionStates(blueprint, 2)
-
-        assert(states.size == 1)
-        assert(states[0].materials[Material.ORE] == 2)
-    }
-
-    @Test
-    fun `Ore robot produced after after third minute`() {
-        val blueprint = Blueprint( "Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 6 clay. Each geode robot costs 9 ore and 8 obsidian.")
-        val states = permuteProductionStates(blueprint, 3)
-
-        assert(states.size == 2)
-        assert(states[1].robots.size == 2)
-        assert(states[1].robots[0].product == Material.ORE)
-        assert(states[1].robots[1].product == Material.ORE)
-    }
 }
