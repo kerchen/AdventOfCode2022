@@ -68,7 +68,7 @@ class Day20KtTest {
     @Test
     fun `first example step 1 moves between 2 and -3`() {
         val numbers = listOf(Number(1), Number(2), Number(-3), Number(3), Number(-2), Number(0), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[0], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[0], numbers[2], numbers[3], numbers[4], numbers[5], numbers[6]))
@@ -77,7 +77,7 @@ class Day20KtTest {
     @Test
     fun `second example step 2 moves between -3 and 3`() {
         val numbers = listOf(Number(2), Number(1), Number(-3), Number(3), Number(-2), Number(0), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[0], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[2], numbers[0], numbers[3], numbers[4], numbers[5], numbers[6]))
@@ -86,7 +86,7 @@ class Day20KtTest {
     @Test
     fun `third example step -3 moves between -2 and 0`() {
         val numbers = listOf(Number(1), Number(-3), Number(2), Number(3), Number(-2), Number(0), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[1], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[2], numbers[3], numbers[4], numbers[1], numbers[5], numbers[6]))
@@ -95,7 +95,7 @@ class Day20KtTest {
     @Test
     fun `fourth example step 3 moves between 0 and 4`() {
         val numbers = listOf(Number(1), Number(2), Number(3), Number(-2), Number(-3), Number(0), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[4], numbers[5], numbers[2], numbers[6]))
@@ -104,16 +104,34 @@ class Day20KtTest {
     @Test
     fun `fifth example step -2 moves between 4 and 1`() {
         val numbers = listOf(Number(1), Number(2), Number(-2), Number(-3), Number(0), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[4], numbers[5], numbers[6], numbers[2]))
+        assert(mixedFile == listOf(numbers[2], numbers[0], numbers[1], numbers[3], numbers[4], numbers[5], numbers[6]))
+    }
+
+    @Test
+    fun `sixth example step 0 does not move`() {
+        val numbers = listOf(Number(1), Number(2), Number(-3), Number(0), Number(3), Number(4), Number(-2))
+        val mixedFile = numbers.toMutableList()
+
+        mix(mixedFile[3], mixedFile)
+        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], numbers[5], numbers[6]))
+    }
+
+    @Test
+    fun `seventh example step 4 moves between -3 and 0`() {
+        val numbers = listOf(Number(1), Number(2), Number(-3), Number(0), Number(3), Number(4), Number(-2))
+        val mixedFile = numbers.toMutableList()
+
+        mix(mixedFile[5], mixedFile)
+        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[5], numbers[3], numbers[4], numbers[6]))
     }
 
     @Test
     fun `moving zero does not change mixed file`() {
         val numbers = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == numbers)
@@ -122,52 +140,52 @@ class Day20KtTest {
     @Test
     fun `mix 1 1 2 one step forward from first position moves to second position`() {
         val numbers = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[0], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[0], numbers[2], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix -1 2 1 one step backward from second position moves to last position`() {
+    fun `mix -1 2 1 one step backward from second position moves to first position`() {
         val numbers = listOf(Number(1), Number(-1), Number(0), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[1], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[2], numbers[3], numbers[4], numbers[1]))
+        assert(mixedFile == listOf(numbers[1], numbers[0], numbers[2], numbers[3], numbers[4]))
     }
 
     @Test
     fun `mix 2 2 4 two steps forward from second position moves to fourth position`() {
         val numbers = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[1], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[2], numbers[3], numbers[1], numbers[4]))
     }
 
     @Test
-    fun `mix 2 4 2 two steps forward from fourth position moves to first position`() {
+    fun `mix 2 4 2 two steps forward from fourth position moves to second position`() {
         val numbers = listOf(Number(1), Number(2), Number(0), Number(2), Number(4))
-        var mixedFile = numbers.toMutableList()
-
-        mix(mixedFile[3], mixedFile)
-        assert(mixedFile == listOf(numbers[3], numbers[0], numbers[1], numbers[2], numbers[4]))
-    }
-
-    @Test
-    fun `mix 3 4 3 three steps forward from fourth position moves to second position`() {
-        val numbers = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[3], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[3], numbers[1], numbers[2], numbers[4]))
     }
 
     @Test
+    fun `mix 3 4 3 three steps forward from fourth position moves to third position`() {
+        val numbers = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
+        val mixedFile = numbers.toMutableList()
+
+        mix(mixedFile[3], mixedFile)
+        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[2], numbers[4]))
+    }
+
+    @Test
     fun `mix -1 1 5 one step backward from first position moves to fourth position`() {
         val numbers = listOf(Number(-1), Number(0), Number(-1), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[0], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[2], numbers[3], numbers[0], numbers[4]))
@@ -176,7 +194,7 @@ class Day20KtTest {
     @Test
     fun `mix -2 1 4 two steps backward from first position moves to third position`() {
         val numbers = listOf(Number(-2), Number(0), Number(-1), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[0], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[2], numbers[0], numbers[3], numbers[4]))
@@ -185,7 +203,7 @@ class Day20KtTest {
     @Test
     fun `mix -3 1 3 three steps backward from first position moves to second position`() {
         val numbers = listOf(Number(-3), Number(0), Number(-1), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[0], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[0], numbers[2], numbers[3], numbers[4]))
@@ -194,25 +212,25 @@ class Day20KtTest {
     @Test
     fun `mix -1 3 2 one step backward from third position moves to second position`() {
         val numbers = listOf(Number(1), Number(0), Number(-1), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[2], numbers[1], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix -2 3 1 two steps backward from third position moves to last position`() {
+    fun `mix -2 3 1 two steps backward from third position moves to first position`() {
         val numbers = listOf(Number(1), Number(0), Number(-2), Number(3), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[4], numbers[2]))
+        assert(mixedFile == listOf(numbers[2], numbers[0], numbers[1], numbers[3], numbers[4]))
     }
 
     @Test
     fun `mix -3 3 4 three steps backward from third position moves to fourth position`() {
         val numbers = listOf(Number(1), Number(2), Number(-3), Number(7), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[2], numbers[4]))
@@ -221,124 +239,115 @@ class Day20KtTest {
     @Test
     fun `mix -4 3 3 four steps backward from third position moves to third position`() {
         val numbers = listOf(Number(1), Number(2), Number(-4), Number(7), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix -5 3 3 five steps backward from third position stays in same position`() {
+    fun `mix -5 3 3 five steps backward from third position moves to second position`() {
         val numbers = listOf(Number(1), Number(2), Number(-5), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))
+        assert(mixedFile == listOf(numbers[0], numbers[2], numbers[1], numbers[3], numbers[4]))
     }
 
     @Test
     fun `mix 1 3 4 one step forward from third position moves to fourth position`() {
         val numbers = listOf(Number(1), Number(0), Number(1), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[2], numbers[4]))
     }
 
     @Test
-    fun `mix 2 3 5 two steps forward from third position moves to fifth position`() {
+    fun `mix 2 3 1 two steps forward from third position moves to first position`() {
         val numbers = listOf(Number(1), Number(0), Number(2), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
-
-        mix(mixedFile[2], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[4], numbers[2]))
-    }
-
-    @Test
-    fun `mix 3 3 1 three steps forward from third position moves to first position`() {
-        val numbers = listOf(Number(1), Number(0), Number(3), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[2], numbers[0], numbers[1], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix 4 3 2 four steps forward from third position moves to second position`() {
-        val numbers = listOf(Number(1), Number(0), Number(4), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
+    fun `mix 3 3 2 three steps forward from third position moves to second position`() {
+        val numbers = listOf(Number(1), Number(0), Number(3), Number(5), Number(4))
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[2], numbers[1], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix 5 3 5 five steps forward from third position moves to same position`() {
-        val numbers = listOf(Number(1), Number(2), Number(0), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
+    fun `mix 4 3 3 four steps forward from third position moves to third position`() {
+        val numbers = listOf(Number(1), Number(0), Number(4), Number(5), Number(4))
+        val mixedFile = numbers.toMutableList()
 
-        mix(mixedFile[3], mixedFile)
+        mix(mixedFile[2], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix -5 4 5 five steps backward from fourth position moves to same position`() {
+    fun `mix 5 3 4 five steps forward from third position moves to fourth position`() {
+        val numbers = listOf(Number(1), Number(2), Number(5), Number(89), Number(4))
+        val mixedFile = numbers.toMutableList()
+
+        mix(mixedFile[2], mixedFile)
+        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[2], numbers[4]))
+    }
+
+    @Test
+    fun `mix -5 4 3 five steps backward from fourth position moves to third position`() {
         val numbers = listOf(Number(1), Number(2), Number(0), Number(-5), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[3], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))
+        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[3], numbers[2], numbers[4]))
     }
 
     @Test
-    fun `mix 7 2 3 seven steps forward from second position moves to third position`() {
+    fun `mix 7 2 3 seven steps forward from second position moves to first position`() {
         val numbers = listOf(Number(1), Number(7), Number(0), Number(5), Number(4))
-        var mixedFile = numbers.toMutableList()
-
-        mix(mixedFile[1], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[2], numbers[1], numbers[3], numbers[4]))
-    }
-
-    @Test
-    fun `mix -7 4 2 seven steps backward from fourth position moves to second position`() {
-        val numbers = listOf(Number(1), Number(7), Number(0), Number(-7), Number(4))
-        var mixedFile = numbers.toMutableList()
-
-        mix(mixedFile[3], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[3], numbers[1], numbers[2], numbers[4]))
-    }
-
-    @Test
-    fun `mix 60 steps forward from second position stays in second position`() {
-        val numbers = listOf(Number(1), Number(60), Number(0), Number(-7), Number(4))
-        var mixedFile = numbers.toMutableList()
-
-        mix(mixedFile[1], mixedFile)
-        assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))
-    }
-
-    @Test
-    fun `mix 64 steps forward from second position moves to first position`() {
-        val numbers = listOf(Number(1), Number(64), Number(0), Number(-7), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[1], mixedFile)
         assert(mixedFile == listOf(numbers[1], numbers[0], numbers[2], numbers[3], numbers[4]))
     }
 
     @Test
-    fun `mix 65 steps forward from second position stays in second position`() {
-        val numbers = listOf(Number(1), Number(65), Number(0), Number(-7), Number(4))
-        var mixedFile = numbers.toMutableList()
+    fun `mix -7 4 1 seven steps backward from fourth position moves to first position`() {
+        val numbers = listOf(Number(1), Number(7), Number(0), Number(-7), Number(4))
+        val mixedFile = numbers.toMutableList()
+
+        mix(mixedFile[3], mixedFile)
+        assert(mixedFile == listOf(numbers[3], numbers[0], numbers[1], numbers[2], numbers[4]))
+    }
+
+    @Test
+    fun `mix 60 steps forward from second position stays in second position`() {
+        val numbers = listOf(Number(1), Number(60), Number(0), Number(-7), Number(4))
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[1], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))
     }
 
     @Test
+    fun `mix 65 steps forward from second position moves to third position`() {
+        val numbers = listOf(Number(1), Number(65), Number(0), Number(-7), Number(4))
+        val mixedFile = numbers.toMutableList()
+
+        mix(mixedFile[1], mixedFile)
+        assert(mixedFile == listOf(numbers[0], numbers[2], numbers[1], numbers[3], numbers[4]))
+    }
+
+    @Test
     fun `mix 60 steps backward from second position remains in second position`() {
         val numbers = listOf(Number(1), Number(-60), Number(0), Number(-7), Number(4))
-        var mixedFile = numbers.toMutableList()
+        val mixedFile = numbers.toMutableList()
 
         mix(mixedFile[1], mixedFile)
         assert(mixedFile == listOf(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]))

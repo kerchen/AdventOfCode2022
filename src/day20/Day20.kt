@@ -2,9 +2,7 @@ package day20
 
 import readInput
 
-class Number(val value: Int) {
-
-}
+class Number(val value: Int)
 
 fun parseInput(input: List<String>): List<Number> {
     var parsed = mutableListOf<Number>()
@@ -29,28 +27,12 @@ fun findGroveCoordinate(mixedFile: List<Number>, offset: Int): Int {
     return mixedFile[index].value
 }
 
-fun ensureValidIndex(index: Int, modulus: Int): Int {
-    var adjustedIndex = index
-    while(adjustedIndex < 0) {
-        adjustedIndex += modulus
-    }
-    return adjustedIndex % modulus
-}
-
 fun mix(number: Number, mixedFile: MutableList<Number>) {
     val oldIndex = findIndex(number, mixedFile)
     val unboundedNewIndex = oldIndex + number.value
-    var newIndex = ensureValidIndex(unboundedNewIndex, mixedFile.size)
-    val wrapped = (unboundedNewIndex < 0 || unboundedNewIndex >= mixedFile.size)
+    val newIndex = ((unboundedNewIndex % (mixedFile.size - 1)) + mixedFile.size - 1) % (mixedFile.size - 1)
 
     if (oldIndex == newIndex) return
-
-    if (wrapped && oldIndex < newIndex) {
-        newIndex = ensureValidIndex(newIndex - 1, mixedFile.size)
-    }
-    if (number.value < 0 && newIndex == 0) {
-        newIndex = mixedFile.size - 1
-    }
 
     mixedFile.removeAt(oldIndex)
     mixedFile.add(newIndex, number)
