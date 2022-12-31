@@ -9,12 +9,12 @@ class Day20KtTest {
         val result = parseInput(input)
 
         assert(result.size == 6)
-        assert(result[0].value == 3)
-        assert(result[1].value == 7)
-        assert(result[2].value == 0)
-        assert(result[3].value == 9)
-        assert(result[4].value == -1339)
-        assert(result[5].value == 39)
+        assert(result[0].value == 3.toLong())
+        assert(result[1].value == 7.toLong())
+        assert(result[2].value == 0.toLong())
+        assert(result[3].value == 9.toLong())
+        assert(result[4].value == -1339.toLong())
+        assert(result[5].value == 39.toLong())
     }
 
     @Test
@@ -46,7 +46,7 @@ class Day20KtTest {
         val mixedFile = listOf(Number(0), Number(1), Number(2), Number(3), Number(4))
         val coordinate = findGroveCoordinate(mixedFile, 3)
 
-        assert(coordinate == 3)
+        assert(coordinate == 3.toLong())
     }
 
     @Test
@@ -54,7 +54,7 @@ class Day20KtTest {
         val mixedFile = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
         val coordinate = findGroveCoordinate(mixedFile, 3)
 
-        assert(coordinate == 1)
+        assert(coordinate == 1.toLong())
     }
 
     @Test
@@ -62,7 +62,7 @@ class Day20KtTest {
         val mixedFile = listOf(Number(1), Number(2), Number(0), Number(3), Number(4))
         val coordinate = findGroveCoordinate(mixedFile, 519)
 
-        assert(coordinate == 2)
+        assert(coordinate == 2.toLong())
     }
 
     @Test

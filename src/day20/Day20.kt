@@ -2,17 +2,17 @@ package day20
 
 import readInput
 
-class Number(val value: Int)
+class Number(val value: Long)
 
 fun parseInput(input: List<String>): List<Number> {
     var parsed = mutableListOf<Number>()
 
     for (i in input) {
-        parsed.add(Number(i.toInt()))
+        parsed.add(Number(i.toLong()))
     }
 
     // There can be only one zero!
-    check(parsed.count {it.value == 0} == 1)
+    check(parsed.count {it.value == 0.toLong()} == 1)
 
     return parsed
 }
@@ -20,9 +20,9 @@ fun parseInput(input: List<String>): List<Number> {
 fun findIndex(value: Number, mixedFile: List<Number>): Int = mixedFile.indexOfFirst {it == value}
 
 
-fun findGroveCoordinate(mixedFile: List<Number>, offset: Int): Int {
-    val pivot = findIndex(mixedFile.find {it.value == 0}!!, mixedFile)
-    var index = (pivot + offset) % mixedFile.size
+fun findGroveCoordinate(mixedFile: List<Number>, offset: Long): Long {
+    val pivot = findIndex(mixedFile.find {it.value == 0.toLong()}!!, mixedFile)
+    var index = ((pivot + offset) % mixedFile.size).toInt()
 
     return mixedFile[index].value
 }
@@ -30,7 +30,7 @@ fun findGroveCoordinate(mixedFile: List<Number>, offset: Int): Int {
 fun mix(number: Number, mixedFile: MutableList<Number>) {
     val oldIndex = findIndex(number, mixedFile)
     val unboundedNewIndex = oldIndex + number.value
-    val newIndex = ((unboundedNewIndex % (mixedFile.size - 1)) + mixedFile.size - 1) % (mixedFile.size - 1)
+    val newIndex: Int = (((unboundedNewIndex % (mixedFile.size - 1)) + mixedFile.size - 1) % (mixedFile.size - 1)).toInt()
 
     if (oldIndex == newIndex) return
 
@@ -40,7 +40,7 @@ fun mix(number: Number, mixedFile: MutableList<Number>) {
 
 
 fun main() {
-    fun part1(input: List<String>): Int {
+    fun part1(input: List<String>): Long {
         val original = parseInput(input)
         var mixedFile = original.toMutableList()
 
@@ -57,11 +57,11 @@ fun main() {
         return gc1 + gc2 + gc3
     }
 
-    fun part2(input: List<String>): Int = 0
+    fun part2(input: List<String>): Long = 0
 
     val testInput = readInput("Day20_test")
-    check(part1(testInput) == 3)
-    check(part2(testInput) == 0)
+    check(part1(testInput) == 3.toLong())
+    check(part2(testInput) == 0.toLong())
 
     val input = readInput("Day20")
     println(part1(input))
