@@ -2,48 +2,78 @@ package day20
 
 import readInput
 
-fun parseInput(input: List<String>): List<Int> {
-    var parsed = mutableListOf<Int>()
+class Number(val value: Int) {
+
+}
+
+fun parseInput(input: List<String>): List<Number> {
+    var parsed = mutableListOf<Number>()
 
     for (i in input) {
-        parsed.add(i.toInt())
+        parsed.add(Number(i.toInt()))
     }
 
-    // Numbers are unique, right?
-    check(parsed.toSet().size == parsed.size)
+    // There can be only one zero!
+    check(parsed.count {it.value == 0} == 1)
 
     return parsed
 }
 
-fun findIndex(value: Int, mixedFile: List<Int>): Int = mixedFile.indexOfFirst {it == value}
+fun findIndex(value: Number, mixedFile: List<Number>): Int = mixedFile.indexOfFirst {it == value}
 
 
-fun findGroveCoordinate(mixedFile: List<Int>, offset: Int): Int {
-    val pivot = findIndex(0, mixedFile)
+fun findGroveCoordinate(mixedFile: List<Number>, offset: Int): Int {
+    val pivot = findIndex(mixedFile.find {it.value == 0}!!, mixedFile)
     var index = (pivot + offset) % mixedFile.size
 
-    return mixedFile[index]
+    return mixedFile[index].value
 }
 
-fun mix(value: Int, mixedFile: MutableList<Int>) {
-    val oldIndex = findIndex(value, mixedFile)
-    var newIndex = (oldIndex + value + mixedFile.size) % mixedFile.size
+fun ensureValidIndex(index: Int, modulus: Int): Int {
+    var adjustedIndex = index
+    while(adjustedIndex < 0) {
+        adjustedIndex += modulus
+    }
+    return adjustedIndex % modulus
+}
+
+fun mix(number: Number, mixedFile: MutableList<Number>) {
+    val oldIndex = findIndex(number, mixedFile)
+    val unboundedNewIndex = oldIndex + number.value
+    var newIndex = ensureValidIndex(unboundedNewIndex, mixedFile.size)
+    val wrapped = (unboundedNewIndex < 0 || unboundedNewIndex >= mixedFile.size)
 
     if (oldIndex == newIndex) return
 
-    if (value > 0 && oldIndex > newIndex) {
-        newIndex = (newIndex + 1) % mixedFile.size
+    if (wrapped && oldIndex < newIndex) {
+        newIndex = ensureValidIndex(newIndex - 1, mixedFile.size)
     }
-    if (value < 0 && oldIndex < newIndex) {
-        newIndex = (newIndex - 1 + mixedFile.size) % mixedFile.size
+    if (number.value < 0 && newIndex == 0) {
+        newIndex = mixedFile.size - 1
     }
+
     mixedFile.removeAt(oldIndex)
-    mixedFile.add(newIndex, value)
+    mixedFile.add(newIndex, number)
 }
 
 
 fun main() {
-    fun part1(input: List<String>): Int = 0
+    fun part1(input: List<String>): Int {
+        val original = parseInput(input)
+        var mixedFile = original.toMutableList()
+
+        for (d in original) {
+            mix(d, mixedFile)
+        }
+
+        val gc1 = findGroveCoordinate(mixedFile, 1000)
+        val gc2 = findGroveCoordinate(mixedFile, 2000)
+        val gc3 = findGroveCoordinate(mixedFile, 3000)
+
+        println("Coordinates: $gc1 $gc2 $gc3")
+
+        return gc1 + gc2 + gc3
+    }
 
     fun part2(input: List<String>): Int = 0
 
