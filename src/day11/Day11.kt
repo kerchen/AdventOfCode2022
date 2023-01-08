@@ -24,15 +24,11 @@ class Monkey(startingItems: List<Item>,
         }
     }
 
-    fun inspectItem(item: Item, simpleWorryReduction: Boolean, commonDivisor: Long): Int {
+    fun inspectItem(item: Item, worryReductionFn: (Long) -> Long): Int {
         // Apply inspection operation
         item.worryLevel = inspectEffectOperation(item.worryLevel)
         // Apply boredom effect
-        if (simpleWorryReduction) {
-            item.worryLevel /= 3.toLong()
-        } else {
-            item.worryLevel = item.worryLevel % commonDivisor
-        }
+        item.worryLevel = worryReductionFn(item.worryLevel)
         // Test worry level & throw
         if (testFunction(item.worryLevel))
             return testSuccessRecipient
@@ -121,6 +117,7 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, simpleWorryReduc
         monkeys.add(createMonkey(inputIt, monkeys.size))
         commonDivisor *= monkeys.last().testFactor
     }
+    val reductionFn = if (simpleWorryReduction) { worry: Long -> worry / 3 } else { worry: Long -> worry % commonDivisor }
     val inspectionCounts = MutableList(monkeys.size) {0}
     for (round in IntRange(1,roundCount)) {
         val monkeyIterator = monkeys.listIterator()
@@ -132,7 +129,7 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, simpleWorryReduc
             while(itemIterator.hasNext()){
                 val item = itemIterator.next()
                 itemIterator.remove()
-                val toMonkey = monkey.inspectItem(item, simpleWorryReduction, commonDivisor)
+                val toMonkey = monkey.inspectItem(item, reductionFn)
                 monkeys[toMonkey].items.add(item)
                 item.ownershipHistory.add(toMonkey)
             }
