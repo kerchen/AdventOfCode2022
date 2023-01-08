@@ -1,17 +1,17 @@
 package day11
 
 import readInput
-import java.math.BigInteger
 import java.util.regex.Pattern
 
-data class Item(var worryLevel: BigInteger) {
+data class Item(var worryLevel: Long) {
     var ownershipHistory = mutableListOf<Int>()
 }
 
 class Monkey(startingItems: List<Item>,
              monkeyNumber: Int,
-             val inspectEffectOperation: (BigInteger) -> BigInteger,
-             val testFunction: (BigInteger) -> Boolean,
+             val inspectEffectOperation: (Long) -> Long,
+             val testFactor: Long,
+             val testFunction: (Long) -> Boolean,
              private val testSuccessRecipient: Int,
              private val testFailureRecipient: Int) {
 
@@ -24,12 +24,14 @@ class Monkey(startingItems: List<Item>,
         }
     }
 
-    fun inspectItem(item: Item, worryReduction: Boolean): Int {
+    fun inspectItem(item: Item, simpleWorryReduction: Boolean, commonDivisor: Long): Int {
         // Apply inspection operation
         item.worryLevel = inspectEffectOperation(item.worryLevel)
         // Apply boredom effect
-        if (worryReduction) {
-            item.worryLevel /= 3.toBigInteger()
+        if (simpleWorryReduction) {
+            item.worryLevel /= 3.toLong()
+        } else {
+            item.worryLevel = item.worryLevel % commonDivisor
         }
         // Test worry level & throw
         if (testFunction(item.worryLevel))
@@ -43,12 +45,12 @@ fun createItems(itemsString: String): List<Item> {
     val worries = itemsString.split(",")
 
     for (worry in worries) {
-        items.add(Item(worry.trim().toBigInteger()))
+        items.add(Item(worry.trim().toLong()))
     }
     return items
 }
 
-fun createOperation(opString: String): (BigInteger) -> BigInteger {
+fun createOperation(opString: String): (Long) -> Long {
     val equalSplit = opString.split("=")
     val elements = equalSplit[1].trim().split(" ")
 
@@ -58,21 +60,21 @@ fun createOperation(opString: String): (BigInteger) -> BigInteger {
             if (elements[2].trim() == "old")
                 return { v -> v * v }
             else
-                return { v -> v * elements[2].trim().toBigInteger() }
+                return { v -> v * elements[2].trim().toLong() }
         }
         "+" -> {
-            return { v -> v + elements[2].trim().toBigInteger() }
+            return { v -> v + elements[2].trim().toLong() }
         }
         else -> throw Exception("Unexpected operator")
     }
 }
 
-fun createTest(testString: String): (BigInteger) -> Boolean {
+fun createTest(testString: String): Pair<Long, (Long) -> Boolean> {
     val pattern = Pattern.compile("""divisible by (\d+)""")
     val matcher = pattern.matcher(testString)
     matcher.find()
-    val factor = matcher.group(1).toBigInteger()
-    return { v -> (v % factor) == 0.toBigInteger() }
+    val factor = matcher.group(1).toLong()
+    return Pair(factor, { v -> (v % factor) == 0.toLong() })
 }
 
 fun parseRecipient(recipientString: String): Int {
@@ -103,18 +105,21 @@ fun createMonkey(inputIt: Iterator<String>, monkeyNumber: Int): Monkey {
     check(failureLine.startsWith("If false:"))
     val failureString = failureLine.split(":")[1]
 
-    return Monkey(createItems(itemsString), monkeyNumber, createOperation(operationString), createTest(testString), parseRecipient(successString), parseRecipient(failureString) )
+    val (testFactor, testFunction) = createTest(testString)
+    return Monkey(createItems(itemsString), monkeyNumber, createOperation(operationString), testFactor, testFunction, parseRecipient(successString), parseRecipient(failureString) )
 }
 
-fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: Boolean): Long {
+fun computeMonkeyBusiness(input: List<String>, roundCount: Int, simpleWorryReduction: Boolean): Long {
     val inputIt = input.iterator()
     val monkeys = mutableListOf<Monkey>()
+    var commonDivisor: Long = 1
 
     while(inputIt.hasNext()) {
         val recordLine = inputIt.next().trim()
         if (recordLine.isEmpty()) continue
         check(recordLine.startsWith("Monkey"))
         monkeys.add(createMonkey(inputIt, monkeys.size))
+        commonDivisor *= monkeys.last().testFactor
     }
     val inspectionCounts = MutableList(monkeys.size) {0}
     for (round in IntRange(1,roundCount)) {
@@ -127,7 +132,7 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: 
             while(itemIterator.hasNext()){
                 val item = itemIterator.next()
                 itemIterator.remove()
-                val toMonkey = monkey.inspectItem(item, worryReduction)
+                val toMonkey = monkey.inspectItem(item, simpleWorryReduction, commonDivisor)
                 monkeys[toMonkey].items.add(item)
                 item.ownershipHistory.add(toMonkey)
             }
@@ -140,19 +145,13 @@ fun computeMonkeyBusiness(input: List<String>, roundCount: Int, worryReduction: 
 fun main() {
     fun part1(input: List<String>): Long = computeMonkeyBusiness(input, 20, true)
 
-    //fun part2(input: List<String>): Long = day11.computeMonkeyBusiness(input, 10000, false)
-    fun part2(input: List<String>): Long = computeMonkeyBusiness(input, 20, false)
-    //fun part2(input: List<String>): Long = day11.computeMonkeyBusiness(input, 1000, false)
+    fun part2(input: List<String>): Long = day11.computeMonkeyBusiness(input, 10000, false)
 
     val testInput = readInput("Day11_test")
     check(part1(testInput) == 10605.toLong())
-    //check(part2(testInput) == 2713310158)
-    check(part2(testInput) == (103*99).toLong())
-    //check(part2(testInput) == (5204*5192).toLong())
+    check(part2(testInput) == 2713310158)
 
-    println("On to the real data...")
     val input = readInput("Day11")
     println(part1(input))
-    println("On to the real data, part 2...")
     println(part2(input))
 }
